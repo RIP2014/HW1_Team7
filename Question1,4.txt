@@ -19,9 +19,21 @@ FF quickly determined the favorability of the largest disk being on the target p
 prioritized it in its search, and upon finding it disregarding actions that would disrupt this 
 state. As the towers of hanoi allow you to ignore the largest disks once they are in the 
 correct positions, this was an ideal optimization from it. It then looked for how to get the 
-11th disk onto the 12th, and so on.
+11th disk onto the 12th, and so on.The plan itself tells little, as the method by which it 
+reaches this plan quickly determines the minimum number of moves needed to solve the problem, 
+so the solution is optimal.
 4.3
-The recursive solution to the towers of hanoi suggests the way to get a stack of discs from A 
-to C is to first move all but the bottom one to B, then to move the bottom to C, then move the 
-ones on B to C. To move the all but the bottom disc to B, apply the recursive solution again, 
-substituting B for C.
+The problem with graphplan is that moves that return to previously considered states are still 
+considered. Towers of Hanoi is reversible, so the sequence "Move the smallest disk from peg 1 
+to peg 3, then move it from peg 3 back to peg 1" is still considered despite how pointless it 
+is. The search through the graph may tend to ignore it with a decent heuristic, but when the 
+path through a previous state is more complex, it becomes difficult to avoid wasting time.
+To solve this, we can make use of the same technique used to optimize the sokoban planner, 
+whereby we store some identifier for each state we've considered in memory. If the planner has 
+already found a shorter way to reach a state, we can back up a step or explore the other 
+approach to that state instead. This wouldn't be as effective on more complex problems, as 
+when the states are more complex than this, more time is needed to compare the current one to 
+the one in memory. It would also provide less benefit to problems with irreversible actions 
+(e.g. a chess board where pawns can only move forward and pieces cannot be un-captured), as 
+there is no chance of overlap with a prior state after one such action is taken. The planner 
+would still be complete with this optimization.
