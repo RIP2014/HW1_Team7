@@ -2,3 +2,4 @@ The bug 1 and 2 algorithms are basic techniques of motion planning that rely on 
 Bug 2, on the other hand, will jump off the obstacle whenever it comes into contact with the m-line (the direct path from start to goal), attempting to save time by taking a more greedy approach. This was effective in the simple layout, reducing the ratio to 2.01, but in the complex obstacle, its greed was its downfall, as it had nothing stopping it from circling the complex surface several times, bringing the ratio up to a horrifying 65.83.
 
 A video demonstrating these can be found here: https://www.youtube.com/watch?v=T2PVaKyxMmY
+Video download link: http://www.mediafire.com/download/cgqwgfkd7ba0ozk/bugAlgorithmVideo.zip
