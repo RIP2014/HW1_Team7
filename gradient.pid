@@ -1,0 +1,113 @@
+int initX = 10;
+int initY = 60;
+int goalX = 210;
+int goalY = 75;
+
+int roomX = 320;
+int roomY = 240;
+int offsetX = 0;
+int offsetY = 0;
+
+int lastTime;
+int stepAction;
+int stepFrequency;
+
+PGraphics obstacleSpace;
+PGraphics navSpace;
+
+IntList xPath;
+IntList yPath;
+
+int totalDist;
+
+void setup()
+{
+  size(640, 480, P2D);
+  
+  obstacleSpace = createGraphics(roomX, roomY);
+  obstacleSpace.beginDraw();
+  obstacleSpace.background(0, 0, 0, 255);
+  obstacleSpace.noStroke();
+  for(int i = 0; i < obstacleSpace.height; i++)
+    for(int j = 0; j < obstacleSpace.width; j++)
+      obstacleSpace.set(i, j, color(255, 255, 255, dist(i, j, goalX, goalY) / 1.3));
+  
+  for(int i = 90; i >= 40; i--)
+  {
+    int c = 255 * (50 - (i - 40)) / 50;
+    obstacleSpace.fill(255, 255, 255, c/8);
+    obstacleSpace.ellipse(50, 60, i, i);
+  }
+  for(int i = 120; i >= 70; i--)
+  {
+    int c = 255 * (50 - (i - 70)) / 50;
+    obstacleSpace.fill(255, 255, 255, c/8);
+    obstacleSpace.ellipse(150, 75, i, i);
+  }
+  
+  obstacleSpace.endDraw();
+  
+  lastTime = millis();
+  
+  navSpace = createGraphics(width, height);
+  xPath = new IntList();
+  yPath = new IntList();
+  xPath.append(initX);
+  yPath.append(initY);
+  
+  totalDist = 0;
+}
+
+void draw()
+{
+  step();
+  float scaleX = (float) width / roomX;
+  float scaleY = (float) height / roomY;
+  background(0, 0, 0);
+  image(obstacleSpace, offsetX * scaleX - 1, offsetY * scaleY - 1, obstacleSpace.width * scaleX, obstacleSpace.height * scaleY);
+  navSpace.beginDraw();
+  navSpace.background(0, 0, 0, 0);
+  navSpace.noStroke();
+  navSpace.fill(255, 0, 0);
+  navSpace.ellipse((initX + offsetX) * scaleX, (initY + offsetY) * scaleY, scaleX * 3, scaleX * 3);
+  navSpace.fill(0, 255, 0);
+  navSpace.ellipse((goalX + offsetX) * scaleX, (goalY + offsetY) * scaleY, scaleX * 3, scaleX * 3);
+  navSpace.noFill();
+  navSpace.stroke(255, 255, 0);
+  for(int i = 0; i + 1 < xPath.size(); i++)
+  {
+    navSpace.line((xPath.get(i) + offsetX) * scaleX, (yPath.get(i) + offsetY) * scaleY,
+      (xPath.get(i + 1) + offsetX) * scaleX, (yPath.get(i + 1) + offsetY) * scaleY);
+  }
+  navSpace.endDraw();
+  image(navSpace, 0, 0);
+}
+
+void step()
+{
+  int currX = xPath.get(xPath.size() - 1);
+  int currY = yPath.get(yPath.size() - 1);
+  PVector delta = new PVector(1, 1);
+  delta.normalize();
+  delta.mult(2);
+  int bestX = currX;
+  int bestY = currY;
+  float best = alpha(obstacleSpace.get(currX, currY));
+  println("curr: " + bestX + ", " + bestY + ", " + alpha(obstacleSpace.get(currX, currY)));
+  for(int i = 0; i < 8; i++)
+  {
+    delta.rotate(PI / 4);
+    int newX = currX + (int) delta.x;
+    int newY = currY + (int) delta.y;
+    float newColor = alpha(obstacleSpace.get(newX, newY));
+    println("test: " + newX + ", " + newY + ", " + newColor);
+    if(newColor < best)
+    {
+      bestX = newX;
+      bestY = newY;
+      best = newColor;
+    }
+  }
+  xPath.append(bestX);
+  yPath.append(bestY);
+}
