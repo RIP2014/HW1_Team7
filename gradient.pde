@@ -22,7 +22,8 @@ PGraphics navSpace;
 FloatList xPath;
 FloatList yPath;
 
-int totalDist;
+float totalDist;
+boolean done;
 
 void setup()
 {
@@ -32,8 +33,8 @@ void setup()
   obstacleSpace.beginDraw();
   obstacleSpace.background(0, 0, 0, 255);
   obstacleSpace.noStroke();
-  for(int i = 0; i < obstacleSpace.height; i++)
-    for(int j = 0; j < obstacleSpace.width; j++)
+  for(int i = 0; i < obstacleSpace.width; i++)
+    for(int j = 0; j < obstacleSpace.height; j++)
     {
       float c = alt(i, j);
       c = constrain(c, 0, 1);
@@ -55,6 +56,7 @@ void setup()
   yPath.append(initY);
   
   totalDist = 0;
+  done = false;
 }
 
 void draw()
@@ -100,6 +102,8 @@ void step()
     return;
   if(millis() - lastTime < 30)
     return;
+  if(done)
+    return;
   lastTime = millis();
   float currX = xPath.get(xPath.size() - 1);
   float currY = yPath.get(yPath.size() - 1);
@@ -141,8 +145,19 @@ void step()
     PVector delta = dir(currX, currY);
     delta.mult(5);
     //println(delta.toString() + " - " + currX + ", " + currY);
-    xPath.append(currX + delta.x);
-    yPath.append(currY + delta.y);
+    float newX = currX + delta.x;
+    float newY = currY + delta.y;
+    xPath.append(newX);
+    yPath.append(newY);
+    totalDist += dist(currX, currY, newX, newY);
+    if(dist(newX, newY, goalX, goalY) < 2)
+    {
+      done = true;
+      float eucDist = dist(initX, initY, goalX, goalY);
+      println("Euclidean distance: " + eucDist);
+      println("Actual distance traveled: " + totalDist);
+      println("Ratio: " + (float) totalDist / eucDist);
+    }
   }
   //println(bestX + ", " + bestY + ": " + best);
 }
